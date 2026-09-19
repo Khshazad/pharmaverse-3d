@@ -1,0 +1,16 @@
+{
+  "name": "PharmaVerse 3D Enterprise",
+  "short_name": "PharmaVerse3D",
+  "description": "Commercial Target Discovery & 3D WebGL Virtual Screening Platform",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#07090e",
+  "theme_color": "#38bdf8",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3004/3004458.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
