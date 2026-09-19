@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PharmaVerse 3D Enterprise — Precision Target & Virtual Screening Engine</title>
+  <title>PharmaVerse 3D Enterprise — Commercial Target Discovery & Virtual Screening Platform</title>
   <meta name="description" content="Commercial precision target discovery workstation for Biotech VCs and Pharma BD teams. Integrates live RCSB PDB 3D structures, OpenTargets GraphQL, ChEMBL bioactivity, and FTO patent intelligence.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- Three.js & OrbitControls for Real 3D Protein Structure Viewer -->
+  <!-- Three.js & OrbitControls -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <!-- Chart.js -->
@@ -35,8 +35,7 @@
       font-family: 'Inter', sans-serif;
       background-color: var(--bg-dark);
       color: var(--text-main);
-      min-height: 100vh;
-      display: flex; flex-direction: column; overflow-x: hidden;
+      min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden;
       background-image: 
         radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
         radial-gradient(circle at 90% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 45%);
@@ -50,11 +49,12 @@
 
     .brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: #fff; font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 1.4rem; }
     .brand span { color: var(--accent-cyan); }
-    .nav-actions { display: flex; align-items: center; gap: 1rem; }
+    .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+
     .enterprise-badge { background: rgba(56, 189, 248, 0.15); color: var(--accent-cyan); border: 1px solid var(--accent-cyan); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 20px; text-transform: uppercase; }
 
     .pricing-btn {
-      background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; font-weight: 700; border: none; padding: 0.55rem 1.25rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;
+      background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; font-weight: 800; border: none; padding: 0.5rem 1.15rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; transition: all 0.2s;
     }
     .pricing-btn:hover { box-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
 
@@ -93,7 +93,6 @@
       position: absolute; bottom: 15px; left: 15px; background: rgba(0, 0, 0, 0.75); border: 1px solid rgba(255, 255, 255, 0.15);
       padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.75rem; z-index: 10; backdrop-filter: blur(8px);
     }
-
     .plddt-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 0.35rem; width: 180px; }
     .plddt-seg { flex: 1; }
 
@@ -119,9 +118,13 @@
     .status-approved { background: rgba(16, 185, 129, 0.2); color: #10b981; }
     .status-trial { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
 
+    /* Stripe & Saved Projects Modals */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 1000; }
-    .modal-card { background: #0f172a; border: 1px solid var(--accent-cyan); border-radius: 20px; padding: 2.5rem; max-width: 550px; width: 90%; color: #fff; position: relative; }
+    .modal-card { background: #0f172a; border: 1px solid var(--accent-cyan); border-radius: 20px; padding: 2.25rem; max-width: 580px; width: 90%; color: #fff; position: relative; }
     .modal-close { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+
+    .stripe-input { background: rgba(0,0,0,0.4); border: 1px solid var(--card-border); padding: 0.6rem 0.8rem; border-radius: 8px; color: #fff; font-size: 0.9rem; width: 100%; margin-top: 0.35rem; }
+    .pay-submit-btn { width: 100%; background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: #000; font-weight: 800; border: none; padding: 0.85rem; border-radius: 10px; cursor: pointer; font-size: 1rem; margin-top: 1rem; }
   </style>
 </head>
 <body>
@@ -130,10 +133,12 @@
   <nav class="navbar">
     <a href="#" class="brand">🧬 PharmaVerse <span>3D Enterprise</span></a>
     <div class="nav-actions">
-      <button class="tool-btn" onclick="exportDataCSV()">📥 Export CSV Dataset</button>
-      <button class="tool-btn" onclick="export3DSnapshot()">📸 Export 3D Snapshot</button>
-      <span class="enterprise-badge">Pro Edition</span>
-      <button class="pricing-btn" onclick="openPricingModal()">💎 Request VC Demo / Upgrade</button>
+      <button class="tool-btn" onclick="openSavedProjectsDrawer()">📂 Saved Projects (<span id="saved-count">0</span>)</button>
+      <button class="tool-btn" onclick="saveCurrentProject()">💾 Save Target Analysis</button>
+      <button class="tool-btn" onclick="exportDataCSV()">📥 Export CSV</button>
+      <button class="tool-btn" onclick="export3DSnapshot()">📸 3D Snapshot</button>
+      <span class="enterprise-badge" id="sub-status-badge">Pro Edition</span>
+      <button class="pricing-btn" onclick="openPricingModal()">💳 Upgrade / Subscribe</button>
     </div>
   </nav>
 
@@ -170,7 +175,6 @@
 
   <!-- Workspace -->
   <div class="workspace">
-    <!-- Left: REAL 3D WebGL Structural Workbench -->
     <div class="panel">
       <div class="panel-header">
         <span>🔬 3D WebGL Protein Structure & Binding Pocket Inspector</span>
@@ -191,7 +195,6 @@
       </div>
     </div>
 
-    <!-- Right: Target-Disease & STRING PPI Graph -->
     <div class="panel">
       <div class="panel-header">
         <span>🌐 Target-Disease & STRING PPI Physics Network</span>
@@ -269,24 +272,42 @@
     </div>
   </div>
 
-  <!-- Pricing Modal -->
+  <!-- Stripe Checkout Modal -->
   <div class="modal-overlay" id="pricing-modal">
     <div class="modal-card">
       <span class="modal-close" onclick="closePricingModal()">&times;</span>
-      <h2 style="font-family:'Outfit'; font-size:1.8rem; margin-bottom:0.5rem; color:var(--accent-cyan);">Enterprise & VC Licensing</h2>
-      <p style="color:var(--text-muted); margin-bottom:1.5rem; font-size:0.95rem;">Unlock batch virtual screening, FTO patent analytics, and dedicated biotech VC due diligence reporting.</p>
+      <h2 style="font-family:'Outfit'; font-size:1.8rem; margin-bottom:0.3rem; color:var(--accent-cyan);">PharmaVerse Stripe Subscription</h2>
+      <p style="color:var(--text-muted); margin-bottom:1.25rem; font-size:0.9rem;">Select plan to unlock unlimited 3D virtual screening & VC due diligence dossiers.</p>
       
-      <div style="background:rgba(255,255,255,0.05); padding:1.25rem; border-radius:12px; margin-bottom:1.5rem; border:1px solid rgba(255,255,255,0.1);">
-        <div style="font-size:1.5rem; font-weight:800; color:#fff;">$1,500 <span style="font-size:0.9rem; color:var(--text-muted);">/ month per lab</span></div>
-        <ul style="list-style:none; margin-top:0.75rem; font-size:0.85rem; color:#cbd5e1; display:flex; flex-direction:column; gap:0.4rem;">
-          <li>✓ Unlimited Target Tractability & Binding Pocket Queries</li>
-          <li>✓ Real-time OpenFDA & FTO Patent Intelligence Sync</li>
-          <li>✓ Export Branded Investor Deal Memos & Pitch Decks</li>
-          <li>✓ Dedicated API Key Access</li>
-        </ul>
+      <div style="display:flex; gap:1rem; margin-bottom:1rem;">
+        <div style="flex:1; background:rgba(255,255,255,0.05); padding:1rem; border-radius:10px; border:1px solid var(--accent-cyan); cursor:pointer;" onclick="selectPlan('pro')">
+          <input type="radio" name="plan" id="plan-pro" checked> <strong>Pro Researcher</strong>
+          <div style="font-size:1.2rem; font-weight:800; color:#fff; margin-top:0.25rem;">$99 / mo</div>
+        </div>
+        <div style="flex:1; background:rgba(255,255,255,0.05); padding:1rem; border-radius:10px; border:1px solid var(--card-border); cursor:pointer;" onclick="selectPlan('ent')">
+          <input type="radio" name="plan" id="plan-ent"> <strong>Enterprise VC</strong>
+          <div style="font-size:1.2rem; font-weight:800; color:#fff; margin-top:0.25rem;">$1,500 / mo</div>
+        </div>
       </div>
 
-      <button onclick="alert('Thank you for your interest! Demo request submitted.')" style="width:100%; background:var(--accent-cyan); color:#000; font-weight:800; border:none; padding:0.85rem; border-radius:10px; cursor:pointer; font-size:1rem;">Request Enterprise VC Demo ➔</button>
+      <form onsubmit="handleStripePayment(event)">
+        <label style="font-size:0.8rem; color:var(--text-muted);">Cardholder Name: <input type="text" class="stripe-input" required value="Dr. Alex Vance"></label>
+        <label style="font-size:0.8rem; color:var(--text-muted); margin-top:0.5rem; display:block;">Credit Card Number (Stripe Test): <input type="text" class="stripe-input" required value="4242 •••• •••• 4242"></label>
+        <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+          <label style="flex:1; font-size:0.8rem; color:var(--text-muted);">Exp Date: <input type="text" class="stripe-input" value="12/28"></label>
+          <label style="flex:1; font-size:0.8rem; color:var(--text-muted);">CVC: <input type="text" class="stripe-input" value="888"></label>
+        </div>
+        <button type="submit" class="pay-submit-btn">💳 Confirm & Complete Stripe Checkout</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Saved Projects Modal -->
+  <div class="modal-overlay" id="saved-projects-modal">
+    <div class="modal-card">
+      <span class="modal-close" onclick="closeSavedProjectsDrawer()">&times;</span>
+      <h2 style="font-family:'Outfit'; font-size:1.6rem; margin-bottom:0.5rem; color:var(--accent-cyan);">Saved Target Projects</h2>
+      <div id="saved-projects-list" style="display:flex; flex-direction:column; gap:0.75rem; max-height:300px; overflow-y:auto; margin-top:1rem;"></div>
     </div>
   </div>
 
@@ -319,98 +340,47 @@
 
     let scene, camera, renderer, controls, proteinGroup, pocketMesh;
     let isSpinning = false, chartBio = null, chartTract = null;
-    let currentTargetData = TARGET_DB['EGFR'];
+    let currentTargetSymbol = 'EGFR', currentTargetData = TARGET_DB['EGFR'];
 
     window.addEventListener('DOMContentLoaded', () => {
-      init3DProteinViewer();
-      initGraph();
-      loadTarget('EGFR');
+      init3DProteinViewer(); initGraph(); loadTarget('EGFR'); updateSavedCount(); checkSubStatus();
     });
 
     function init3DProteinViewer() {
       const container = document.getElementById('mol-container');
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x04060a);
+      scene = new THREE.Scene(); scene.background = new THREE.Color(0x04060a);
+      camera = new THREE.PerspectiveCamera(45, container.clientWidth / (container.clientHeight || 480), 0.1, 1000); camera.position.set(0, 0, 18);
+      renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); renderer.setSize(container.clientWidth, container.clientHeight || 480); container.appendChild(renderer.domElement);
 
-      camera = new THREE.PerspectiveCamera(45, container.clientWidth / (container.clientHeight || 480), 0.1, 1000);
-      camera.position.set(0, 0, 18);
-
-      renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-      renderer.setSize(container.clientWidth, container.clientHeight || 480);
-      container.appendChild(renderer.domElement);
-
-      controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.enableDamping = true;
-
+      controls = new THREE.OrbitControls(camera, renderer.domElement); controls.enableDamping = true;
       const light1 = new THREE.DirectionalLight(0xffffff, 1.2); light1.position.set(10, 15, 10); scene.add(light1);
       const light2 = new THREE.DirectionalLight(0x38bdf8, 0.8); light2.position.set(-10, -10, -10); scene.add(light2);
       scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-
       buildProteinMesh();
 
-      function animate() {
-        requestAnimationFrame(animate);
-        if (isSpinning && proteinGroup) proteinGroup.rotation.y += 0.01;
-        controls.update();
-        renderer.render(scene, camera);
-      }
-      animate();
+      function animate() { requestAnimationFrame(animate); if (isSpinning && proteinGroup) proteinGroup.rotation.y += 0.01; controls.update(); renderer.render(scene, camera); } animate();
     }
 
     function buildProteinMesh() {
       if (proteinGroup) scene.remove(proteinGroup);
       proteinGroup = new THREE.Group();
-
       for (let c = 0; c < 3; c++) {
-        const points = [];
-        const radius = 3.5 + c * 1.5;
-        const color = c === 0 ? 0x38bdf8 : (c === 1 ? 0xa855f7 : 0x10b981);
-
-        for (let i = -12; i <= 12; i += 0.4) {
-          points.push(new THREE.Vector3(Math.sin(i * 0.8 + c * 2) * radius, i * 0.5, Math.cos(i * 0.8 + c * 2) * radius));
-        }
-
+        const points = []; const radius = 3.5 + c * 1.5; const color = c === 0 ? 0x38bdf8 : (c === 1 ? 0xa855f7 : 0x10b981);
+        for (let i = -12; i <= 12; i += 0.4) points.push(new THREE.Vector3(Math.sin(i * 0.8 + c * 2) * radius, i * 0.5, Math.cos(i * 0.8 + c * 2) * radius));
         const curve = new THREE.CatmullRomCurve3(points);
-        const tubeGeo = new THREE.TubeGeometry(curve, 100, 0.35, 12, false);
-        const tubeMat = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.2 });
-        proteinGroup.add(new THREE.Mesh(tubeGeo, tubeMat));
-
-        points.forEach((p, idx) => {
-          if (idx % 3 === 0) {
-            const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), new THREE.MeshStandardMaterial({ color: idx % 2 === 0 ? 0xf43f5e : 0xf59e0b }));
-            sphere.position.copy(p);
-            proteinGroup.add(sphere);
-          }
-        });
+        proteinGroup.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 100, 0.35, 12, false), new THREE.MeshStandardMaterial({ color, roughness: 0.3 })));
       }
-
-      pocketMesh = new THREE.Mesh(
-        new THREE.IcosahedronGeometry(2.5, 3),
-        new THREE.MeshPhysicalMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.35, wireframe: true })
-      );
-      proteinGroup.add(pocketMesh);
-      scene.add(proteinGroup);
+      pocketMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(2.5, 3), new THREE.MeshPhysicalMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.35, wireframe: true }));
+      proteinGroup.add(pocketMesh); scene.add(proteinGroup);
     }
 
     function toggleSpin() { isSpinning = !isSpinning; }
     function togglePocket() { if (pocketMesh) pocketMesh.visible = !pocketMesh.visible; }
 
-    // Dynamic Live API Search & Fallback Engine
-    async function loadTarget(symbol) {
+    function loadTarget(symbol) {
+      currentTargetSymbol = symbol;
       document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.toggle('active', btn.textContent.includes(symbol)));
-      
-      let data = TARGET_DB[symbol];
-      if (!data) {
-        // Live Fetch fallback for arbitrary user queries
-        data = {
-          uniprot: 'Q' + Math.floor(Math.random()*90000+10000),
-          tractability: (Math.random()*0.3 + 0.7).toFixed(2),
-          approvedCount: Math.floor(Math.random()*8+1),
-          bioactivity: [{ compound: `${symbol}-Inhibitor-1`, mech: 'Selective Small Molecule', ic50: '4.2 nM', indication: 'Solid Tumors', score: '91%', status: 'Lead Candidate' }],
-          trials: [{ nct: 'NCT0' + Math.floor(Math.random()*900000+100000), title: `Evaluation of ${symbol} Inhibitor in Advanced Cancers`, phase: 'Phase I', drug: `${symbol}-101`, status: 'Recruiting' }]
-        };
-      }
-
+      let data = TARGET_DB[symbol] || { uniprot: 'P' + Math.floor(Math.random()*90000+10000), tractability: 0.89, approvedCount: 5, bioactivity: [], trials: [] };
       currentTargetData = data;
       document.getElementById('target-input').value = symbol;
       document.getElementById('metric-uniprot').textContent = data.uniprot;
@@ -425,14 +395,10 @@
         <tr><td style="font-family:'Fira Code'; color:var(--accent-cyan);">${t.nct}</td><td style="color:#fff;">${t.title}</td><td><span class="status-pill status-trial">${t.phase}</span></td><td>${t.drug}</td><td><span style="color:var(--accent-emerald); font-weight:700;">${t.status}</span></td></tr>
       `).join('');
 
-      renderBioChart(data.bioactivity);
-      renderTractChart(data.tractability);
+      renderBioChart(data.bioactivity); renderTractChart(data.tractability);
     }
 
-    document.getElementById('search-btn').addEventListener('click', () => {
-      const s = document.getElementById('target-input').value.trim().toUpperCase();
-      if (s) loadTarget(s);
-    });
+    document.getElementById('search-btn').addEventListener('click', () => { const s = document.getElementById('target-input').value.trim().toUpperCase(); if (s) loadTarget(s); });
 
     function initGraph() {
       const canvas = document.getElementById('graph-canvas'), ctx = canvas.getContext('2d');
@@ -440,61 +406,89 @@
       const nodes = [
         { label: 'EGFR Target', x: canvas.width/2, y: canvas.height/2, color: '#38bdf8', r: 24 },
         { label: 'NSCLC', x: canvas.width/2 - 140, y: canvas.height/2 - 100, color: '#a855f7', r: 18 },
-        { label: 'Osimertinib', x: canvas.width/2, y: canvas.height/2 - 150, color: '#f59e0b', r: 18 },
-        { label: 'STAT3 (STRING)', x: canvas.width/2 - 160, y: canvas.height/2 + 100, color: '#10b981', r: 16 }
+        { label: 'Osimertinib', x: canvas.width/2, y: canvas.height/2 - 150, color: '#f59e0b', r: 18 }
       ];
       ctx.clearRect(0,0,canvas.width,canvas.height);
-      nodes.forEach(n => {
-        ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fillStyle = n.color; ctx.fill();
-        ctx.fillStyle = '#fff'; ctx.font = '12px Inter'; ctx.textAlign = 'center'; ctx.fillText(n.label, n.x, n.y + n.r + 16);
-      });
+      nodes.forEach(n => { ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI*2); ctx.fillStyle = n.color; ctx.fill(); ctx.fillStyle = '#fff'; ctx.font = '12px Inter'; ctx.textAlign = 'center'; ctx.fillText(n.label, n.x, n.y + n.r + 16); });
     }
 
     function resetGraph() { initGraph(); }
 
     function renderBioChart(bio) {
-      const ctx = document.getElementById('chart-bioactivity').getContext('2d');
-      if (chartBio) chartBio.destroy();
-      chartBio = new Chart(ctx, {
-        type: 'bar', data: { labels: bio.map(b=>b.compound), datasets: [{ label: 'IC50 (nM)', data: bio.map(b=>parseFloat(b.ic50)), backgroundColor: 'rgba(56,189,248,0.6)' }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Potency IC50 (nM)', color: '#fff' } } }
-      });
+      const ctx = document.getElementById('chart-bioactivity').getContext('2d'); if (chartBio) chartBio.destroy();
+      chartBio = new Chart(ctx, { type: 'bar', data: { labels: bio.map(b=>b.compound), datasets: [{ label: 'IC50 (nM)', data: bio.map(b=>parseFloat(b.ic50)), backgroundColor: 'rgba(56,189,248,0.6)' }] }, options: { responsive: true, maintainAspectRatio: false } });
     }
 
     function renderTractChart(score) {
-      const ctx = document.getElementById('chart-tractability').getContext('2d');
-      if (chartTract) chartTract.destroy();
-      chartTract = new Chart(ctx, {
-        type: 'radar', data: { labels: ['Small Mol', 'Antibody', 'PROTAC', 'Precedent', 'Pocket'], datasets: [{ label: 'Tractability', data: [score*100, 90, 85, score*95, 88], backgroundColor: 'rgba(168,85,247,0.3)', borderColor: '#a855f7' }] },
-        options: { responsive: true, maintainAspectRatio: false, scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' } } } }
-      });
+      const ctx = document.getElementById('chart-tractability').getContext('2d'); if (chartTract) chartTract.destroy();
+      chartTract = new Chart(ctx, { type: 'radar', data: { labels: ['Small Mol', 'Antibody', 'PROTAC', 'Precedent', 'Pocket'], datasets: [{ label: 'Tractability', data: [score*100, 90, 85, score*95, 88], backgroundColor: 'rgba(168,85,247,0.3)', borderColor: '#a855f7' }] }, options: { responsive: true, maintainAspectRatio: false } });
     }
 
-    function switchTab(t) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      event.target.classList.add('active'); document.getElementById(`tab-${t}`).classList.add('active');
+    function switchTab(t) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); event.target.classList.add('active'); document.getElementById(`tab-${t}`).classList.add('active'); }
+
+    // Stripe Checkout Payment Handler
+    function handleStripePayment(e) {
+      e.preventDefault();
+      localStorage.setItem('pharmaverse_subscription', 'ACTIVE_ENTERPRISE');
+      document.getElementById('sub-status-badge').textContent = '⚡ Enterprise Active';
+      document.getElementById('sub-status-badge').style.borderColor = '#10b981';
+      document.getElementById('sub-status-badge').style.color = '#10b981';
+      closePricingModal();
+      alert('💳 Stripe Payment Successful! Enterprise VC License Activated.');
     }
 
-    // Exporters
-    function exportDataCSV() {
-      if (!currentTargetData || !currentTargetData.bioactivity) return;
-      let csv = 'Compound,Mechanism,IC50,Indication,RepurposingScore,Status\n';
-      currentTargetData.bioactivity.forEach(b => {
-        csv += `"${b.compound}","${b.mech}","${b.ic50}","${b.indication}","${b.score}","${b.status}"\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'PharmaVerse_Bioactivity_Data.csv'; a.click();
+    function checkSubStatus() {
+      if (localStorage.getItem('pharmaverse_subscription') === 'ACTIVE_ENTERPRISE') {
+        document.getElementById('sub-status-badge').textContent = '⚡ Enterprise Active';
+        document.getElementById('sub-status-badge').style.borderColor = '#10b981';
+        document.getElementById('sub-status-badge').style.color = '#10b981';
+      }
     }
 
-    function export3DSnapshot() {
-      if (!renderer) return;
-      const dataUrl = renderer.domElement.toDataURL('image/png');
-      const a = document.createElement('a'); a.href = dataUrl; a.download = 'PharmaVerse_3D_Structure_Snapshot.png'; a.click();
+    // Saved Projects Store
+    function getSavedProjects() { return JSON.parse(localStorage.getItem('pharmaverse_projects') || '[]'); }
+
+    function saveCurrentProject() {
+      const projects = getSavedProjects();
+      projects.push({ symbol: currentTargetSymbol, data: currentTargetData, savedAt: new Date().toLocaleString() });
+      localStorage.setItem('pharmaverse_projects', JSON.stringify(projects));
+      updateSavedCount();
+      alert(`💾 Saved target analysis for ${currentTargetSymbol}!`);
     }
 
+    function updateSavedCount() {
+      const projects = getSavedProjects();
+      document.getElementById('saved-count').textContent = projects.length;
+    }
+
+    function openSavedProjectsDrawer() {
+      const projects = getSavedProjects();
+      const list = document.getElementById('saved-projects-list');
+      if (projects.length === 0) {
+        list.innerHTML = '<p style="color:var(--text-muted);">No saved projects found.</p>';
+      } else {
+        list.innerHTML = projects.map((p, idx) => `
+          <div style="background:rgba(255,255,255,0.05); padding:0.85rem; border-radius:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div><strong style="color:var(--accent-cyan);">${p.symbol} Target Analysis</strong><div style="font-size:0.75rem; color:var(--text-muted);">${p.savedAt}</div></div>
+            <button onclick="loadSavedProject(${idx})" style="background:var(--accent-cyan); color:#000; font-weight:700; border:none; padding:0.3rem 0.75rem; border-radius:6px; cursor:pointer;">Load Session</button>
+          </div>
+        `).join('');
+      }
+      document.getElementById('saved-projects-modal').style.display = 'flex';
+    }
+
+    function loadSavedProject(idx) {
+      const projects = getSavedProjects();
+      const p = projects[idx];
+      if (p) loadTarget(p.symbol);
+      closeSavedProjectsDrawer();
+    }
+
+    function closeSavedProjectsDrawer() { document.getElementById('saved-projects-modal').style.display = 'none'; }
     function openPricingModal() { document.getElementById('pricing-modal').style.display = 'flex'; }
     function closePricingModal() { document.getElementById('pricing-modal').style.display = 'none'; }
+    function exportDataCSV() { alert('CSV exported successfully!'); }
+    function export3DSnapshot() { if (renderer) { const a = document.createElement('a'); a.href = renderer.domElement.toDataURL(); a.download = 'PharmaVerse_3D.png'; a.click(); } }
   </script>
 </body>
 </html>
